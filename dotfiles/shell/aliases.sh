@@ -35,5 +35,21 @@ gp() {
   git push -u origin "$branch"
 }
 
+# Python aliases
+alias py='python3'
+alias python='python3'
+
+pyvenv() {
+  if [ ! -d venv ]; then
+    python3 -m venv venv
+    echo "✓ Virtual environment created"
+  else
+    echo "✓ Virtual environment already exists"
+  fi
+  echo "Activating virtual environment..."
+  source venv/bin/activate
+  echo "✓ Virtual environment activated"
+}
+
 
 
