@@ -27,8 +27,8 @@ gp() {
   local branch=$(git branch --show-current)
   
   if [[ "$branch" == "main" || "$branch" == "master" ]]; then
-    echo "❌ Erro: Push direto na '$branch' bloqueado por segurança!"
-    echo "Use 'git push' manualmente se realmente precisar disso."
+    echo "❌ Error: Direct push to '$branch' blocked for security!"
+    echo "Use 'git push' manually if you really need to do this."
     return 1
   fi
 
