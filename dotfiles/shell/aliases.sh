@@ -55,6 +55,26 @@ pyvenv() {
 
 # Terraform aliases
 alias tf='terraform'
+
+# Dynamic aliases for workspace directories
+# Creates aliases like cd{folder_name} for each folder in WORKSPACE_PATH
+_create_workspace_aliases() {
+  if [ ! -d "$WORKSPACE_PATH" ]; then
+    echo "⚠ Workspace path does not exist: $WORKSPACE_PATH"
+    return
+  fi
+
+  for dir in "$WORKSPACE_PATH"/*/; do
+    folder_name=$(basename "$dir")
+    
+    alias_name="cd${folder_name}"
+    
+    alias "$alias_name=cd \"$dir\""
+  done
+}
+
+# Run on shell initialization
+_create_workspace_aliases
 alias tfi='terraform init'
 alias tfp='terraform plan'
 alias tfa='terraform apply'
