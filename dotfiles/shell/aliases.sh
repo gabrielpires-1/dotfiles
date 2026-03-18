@@ -38,6 +38,8 @@ gp() {
 # Python aliases
 alias py='python3'
 alias python='python3'
+alias pyf='pip freeze > requirements.txt'
+alias pyr='pip install -r requirements.txt'
 
 pyvenv() {
   if [ ! -d venv ]; then
@@ -51,5 +53,9 @@ pyvenv() {
   echo "✓ Virtual environment activated"
 }
 
-
-
+# Terraform aliases
+alias tf='terraform'
+alias tfi='terraform init'
+alias tfp='terraform plan'
+alias tfa='terraform apply'
+alias tfd='terraform destroy'
