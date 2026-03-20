@@ -7,6 +7,7 @@
 alias c='clear'
 alias ll='ls -lF'
 alias la='ls -A'
+alias apt-up='sudo apt update && sudo apt upgrade -y'
 
 # Custom alias to navigate to specific directories
 alias cdworkspace="cd \"$WORKSPACE_PATH\""
@@ -79,3 +80,6 @@ alias tfi='terraform init'
 alias tfp='terraform plan'
 alias tfa='terraform apply'
 alias tfd='terraform destroy'
+
+# Network aliases
+alias myip='curl ifconfig.me && echo || echo "Unable to fetch IP address. Check your internet connection."'
