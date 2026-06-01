@@ -23,6 +23,23 @@ alias gd='git diff'
 alias gl='git log --oneline --graph --decorate'
 alias gu='git pull'
 
+# Git Commands
+# Custom function to open a PR from current branch to master
+gpr() {
+  local branch=$(git branch --show-current)
+  local title=$(git log -1 --pretty=%s)
+
+  if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+    echo "❌ Error: Already on '$branch'. Switch to a feature branch first."
+    return 1
+  fi
+
+  echo "🔀 Opening PR: \"$title\""
+  echo "   $branch → master"
+
+  gp && gh pr create --base master --head "$branch" --title "$title" --body ""
+}
+
 # Custom function to prevent accidental pushes to main/master
 gp() {
   local branch=$(git branch --show-current)
