@@ -8,6 +8,7 @@ alias c='clear'
 alias ll='ls -lF'
 alias la='ls -A'
 alias apt-up='sudo apt update && sudo apt upgrade -y'
+alias e='exit'
 
 # Custom alias to navigate to specific directories
 alias cdworkspace="cd \"$WORKSPACE_PATH\""
@@ -22,6 +23,23 @@ alias gswc='git switch -c'
 alias gd='git diff'
 alias gl='git log --oneline --graph --decorate'
 alias gu='git pull'
+
+# Git Commands
+# Custom function to open a PR from current branch to main
+gpr() {
+  local branch=$(git branch --show-current)
+  local title=$(git log -1 --pretty=%s)
+
+  if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+    echo "❌ Error: Already on '$branch'. Switch to a feature branch first."
+    return 1
+  fi
+
+  echo "🔀 Opening PR: \"$title\""
+  echo "   $branch → main"
+
+  gp && gh pr create --base main --head "$branch" --title "$title" --body ""
+}
 
 # Custom function to prevent accidental pushes to main/master
 gp() {
