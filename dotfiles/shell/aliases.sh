@@ -25,20 +25,34 @@ alias gl='git log --oneline --graph --decorate'
 alias gu='git pull'
 
 # Git Commands
-# Custom function to open a PR from current branch to main
+# Custom function to open a PR from current branch to main | master
 gpr() {
   local branch=$(git branch --show-current)
   local title=$(git log -1 --pretty=%s)
+  local remote=$(git remote get-url origin)
 
-  if [[ "$branch" == "main" || "$branch" == "master" ]]; then
-    echo "❌ Error: Already on '$branch'. Switch to a feature branch first."
+  if [[ "$remote" == *"dev.azure.com"* ]]; then
+    local base="master"
+  elif [[ "$remote" == *"github.com"* ]]; then
+    local base="main"
+  else
+    echo "❌ Error: Remote '$remote' is not GitHub or Azure DevOps."
+    return 1
+  fi
+
+  if [[ "$branch" == "$base" ]]; then
+    echo "❌ Error: Already on '$base'. Switch to a feature branch first."
     return 1
   fi
 
   echo "🔀 Opening PR: \"$title\""
-  echo "   $branch → main"
+  echo "   $branch → $base"
 
-  gp && gh pr create --base main --head "$branch" --title "$title" --body ""
+  if [[ "$remote" == *"dev.azure.com"* ]]; then
+    gp && az repos pr create --source-branch "$branch" --target-branch "$base" --title "$title" --description ""
+  else
+    gp && gh pr create --base "$base" --head "$branch" --title "$title" --body ""
+  fi
 }
 
 # Custom function to prevent accidental pushes to main/master
