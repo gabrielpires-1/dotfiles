@@ -115,5 +115,10 @@ alias tfp='terraform plan'
 alias tfa='terraform apply'
 alias tfd='terraform destroy'
 
+# History search
+hg() {
+  history | grep "$@"
+}
+
 # Network aliases
 alias myip='curl ifconfig.me && echo || echo "Unable to fetch IP address. Check your internet connection."'
