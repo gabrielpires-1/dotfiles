@@ -23,6 +23,8 @@ alias gswc='git switch -c'
 alias gd='git diff'
 alias gl='git log --oneline --graph --decorate'
 alias gu='git pull'
+alias gr='git restore'
+alias gb='git branch'
 
 # Git Commands
 # Custom function to open a PR from current branch to main | master
