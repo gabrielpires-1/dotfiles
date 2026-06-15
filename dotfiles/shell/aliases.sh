@@ -71,6 +71,32 @@ gp() {
   git push -u origin "$branch"
 }
 
+# Custom function to fetch a remote branch, sync it locally, and run
+# Claude's /review against git diff instead of looking up a PR
+claude-review() {
+  local branch="$1"
+
+  if [[ -z "$branch" ]]; then
+    echo "❌ Error: Usage: claude-review <branch>"
+    return 1
+  fi
+
+  git fetch origin "$branch" || return 1
+
+  if git show-ref --verify --quiet "refs/heads/$branch"; then
+    git switch "$branch" && git reset --hard "origin/$branch"
+  else
+    git switch -c "$branch" "origin/$branch"
+  fi
+
+  local base="main"
+  if git show-ref --verify --quiet refs/remotes/origin/master; then
+    base="master"
+  fi
+
+  claude "/review Don't look up or list a PR for this - just review the local changes using \`git diff $base\`."
+}
+
 # Python aliases
 alias py='python3'
 alias python='python3'
