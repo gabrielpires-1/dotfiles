@@ -33,6 +33,7 @@ gpr() {
   local branch=$(git branch --show-current)
   local title=$(git log -1 --pretty=%s)
   local remote=$(git remote get-url origin)
+  local pr_url=""
 
   if [[ "$remote" == *"dev.azure.com"* ]]; then
     local base="master"
@@ -51,11 +52,42 @@ gpr() {
   echo "🔀 Opening PR: \"$title\""
   echo "   $branch → $base"
 
+  gp || { echo "❌ Error: 'gp' (push) failed."; return 1; }
+
   if [[ "$remote" == *"dev.azure.com"* ]]; then
-    gp && az repos pr create --source-branch "$branch" --target-branch "$base" --title "$title" --description ""
+    local pr_output pr_id
+    pr_output=$(az repos pr create \
+      --source-branch "$branch" \
+      --target-branch "$base" \
+      --title "$title" \
+      --description "" \
+      --query "pullRequestId" -o tsv 2>&1)
+
+    if [[ $? -ne 0 || -z "$pr_output" ]]; then
+      echo "❌ Error: Azure DevOps PR creation failed."
+      echo "$pr_output"
+      return 1
+    fi
+
+    pr_id="$pr_output"
+    local web_base="${remote%.git}"
+    pr_url="${web_base}/pullrequest/${pr_id}"
   else
-    gp && gh pr create --base "$base" --head "$branch" --title "$title" --body ""
+    local pr_output
+    pr_output=$(gh pr create --base "$base" --head "$branch" --title "$title" --body "" 2>&1)
+
+    if [[ $? -ne 0 || -z "$pr_output" ]]; then
+      echo "❌ Error: GitHub PR creation failed."
+      echo "$pr_output"
+      return 1
+    fi
+
+    pr_url="$pr_output"
   fi
+
+  echo "✅ PR created:"
+  echo "$pr_url"
+  echo "$pr_url" | xclip -selection clipboard && echo "(copied to clipboard)" || echo "⚠️ Unable to copy to clipboard."
 }
 
 # Custom function to prevent accidental pushes to main/master
@@ -122,4 +154,4 @@ hg() {
 }
 
 # Network aliases
-alias myip='curl ifconfig.me && echo || echo "Unable to fetch IP address. Check your internet connection."'
+alias myip='ip=$(curl -s ifconfig.me) && echo "$ip" && echo "$ip" | xclip -selection clipboard && echo "(copied to clipboard)" || echo "Unable to fetch IP address. Check your internet connection."'
