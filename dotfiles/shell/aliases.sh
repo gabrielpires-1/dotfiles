@@ -55,6 +55,29 @@ gpr() {
   gp || { echo "❌ Error: 'gp' (push) failed."; return 1; }
 
   if [[ "$remote" == *"dev.azure.com"* ]]; then
+    local org project repo
+
+    if [[ "$remote" == git@ssh.dev.azure.com:* ]]; then
+      # SSH format: git@ssh.dev.azure.com:v3/org/project/repo(.git)
+      local path="${remote#git@ssh.dev.azure.com:v3/}"
+      path="${path%.git}"
+      org=$(echo "$path" | cut -d'/' -f1)
+      project=$(echo "$path" | cut -d'/' -f2)
+      repo=$(echo "$path" | cut -d'/' -f3)
+    else
+      # HTTPS format: https://dev.azure.com/org/project/_git/repo(.git)
+      local path="${remote#*dev.azure.com/}"
+      path="${path%.git}"
+      org=$(echo "$path" | cut -d'/' -f1)
+      project=$(echo "$path" | cut -d'/' -f2)
+      repo=$(echo "$path" | cut -d'/' -f4)  # skip "_git" at position 3
+    fi
+
+    if [[ -z "$org" || -z "$project" || -z "$repo" ]]; then
+      echo "❌ Error: Could not parse Azure DevOps remote URL: $remote"
+      return 1
+    fi
+
     local pr_output pr_id
     pr_output=$(az repos pr create \
       --source-branch "$branch" \
@@ -70,8 +93,7 @@ gpr() {
     fi
 
     pr_id="$pr_output"
-    local web_base="${remote%.git}"
-    pr_url="${web_base}/pullrequest/${pr_id}"
+    pr_url="https://dev.azure.com/${org}/${project}/_git/${repo}/pullrequest/${pr_id}"
   else
     local pr_output
     pr_output=$(gh pr create --base "$base" --head "$branch" --title "$title" --body "" 2>&1)
