@@ -34,13 +34,24 @@ gpr() {
   local title=$(git log -1 --pretty=%s)
   local remote=$(git remote get-url origin)
   local pr_url=""
+  local base=""
+  local remote_heads=""
 
-  if [[ "$remote" == *"dev.azure.com"* ]]; then
-    local base="master"
-  elif [[ "$remote" == *"github.com"* ]]; then
-    local base="main"
-  else
+  if [[ "$remote" != *"dev.azure.com"* && "$remote" != *"github.com"* ]]; then
     echo "❌ Error: Remote '$remote' is not GitHub or Azure DevOps."
+    return 1
+  fi
+
+  # Detect the PR target from the remote heads, not from the host.
+  # Prefer main, then master. Do not guess from GitHub vs Azure DevOps.
+  remote_heads=$(git ls-remote --heads origin 2>/dev/null | awk '{print $2}')
+
+  if echo "$remote_heads" | grep -qx 'refs/heads/main'; then
+    base="main"
+  elif echo "$remote_heads" | grep -qx 'refs/heads/master'; then
+    base="master"
+  else
+    echo "❌ Error: I cannot open the PR."
     return 1
   fi
 
