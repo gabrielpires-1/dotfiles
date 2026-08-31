@@ -51,7 +51,7 @@ gpr() {
   elif echo "$remote_heads" | grep -qx 'refs/heads/master'; then
     base="master"
   else
-    echo "❌ Error: I cannot open the PR."
+    echo "❌ Error: I cannot open the PR. Remote does not contain branch main or master."
     return 1
   fi
 
